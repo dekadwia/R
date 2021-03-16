@@ -6,6 +6,7 @@ library("leaps")
 library("MASS")
 library("caTools")
 library("dplyr")
+library("pubr")
 
 #Import Data
 fat<-read.csv("fat.csv", sep=",", head=T)
