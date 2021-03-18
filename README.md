@@ -1,2 +1,2 @@
-# RStudio
-RStudio for Machine Learning
+# R
+R for Machine Learning
