@@ -1,26 +1,75 @@
 #Open Data and look for type of data
 library(readxl)
 library(ggplot2)
+library(dplyr)
+library(visdat)
+
 ore <- read_excel("01-ORE.xlsx")
 ore2 <- data.frame(ore$ORE, ore$Performance)
+ore3 <- ore[1:3,1:5]
+
+ore4 <- ore2 %>%
+  filter(ore.Performance<=100)
 
 #Build Linier Model
-lin_reg = lm(ore.ORE ~ ., data = ore2)
-
+lin_reg = lm(ore.ORE ~ ., data = ore4)
+summary(lin_reg)
 #Visualisasi Regresi Linier
 ggplot() +    
-  geom_point(aes(x = ore2$ore.Performance, 
-                 y = ore2$ore.ORE), 
+  geom_point(aes(x = ore4$ore.Performance, 
+                 y = ore4$ore.ORE), 
              colour = 'red') +    
-  geom_line(aes(x = ore2$ore.Performance, 
-                y = predict(lin_reg, newdata = ore2)), 
+  geom_line(aes(x = ore4$ore.Performance, 
+                y = predict(lin_reg, newdata = ore4)), 
             colour = 'blue') +    
   ggtitle('Performance Effect on ORE(Linear Regression)') +
   xlab('Performance') +
   ylab('ORE')
 
 # Prediksi performance =75% dengan model regresi sederhana
-predict(lin_reg, data.frame(ore.Performance = 75))
+predict(lin_reg, data.frame(ore.Performance =90))
+
+#Linier Regression dengan training dan testing set
+
+library(caTools)
+set.seed(123)
+split = sample.split(ore4$ore.Performance, SplitRatio = 2/3)
+training_set = subset(ore4, split == TRUE)
+test_set = subset(ore4, split == FALSE)
+
+# Fitting Simple Linear Regression ke the Training set
+regressor = lm(ore.ORE ~ ore.Performance, data = training_set)
+
+# Memprediksi hasil test set
+y_pred = predict(regressor, newdata = test_set)
+
+# Visualising the Training set results
+library(ggplot2)
+ggplot() +
+  geom_point(aes(x = training_set$ore.Performance,
+                 y = training_set$ore.ORE), 
+             colour = 'red') +
+  geom_line(aes(x = training_set$ore.Performance, 
+                y = predict(regressor, 
+    newdata = training_set)), colour = 'blue') +
+  ggtitle('Performance Effect on ORE with training and testing') +
+  xlab('Performance') +
+  ylab('ORE')
+
+# Visualising the Test set results
+library(ggplot2)
+ggplot() +
+  geom_point(aes(x = test_set$ore.Performance, 
+        y = test_set$ore.ORE), colour = 'red') +
+  geom_line(aes(x = training_set$ore.Performance, 
+    y = predict(regressor, newdata = 
+      training_set)), colour = 'blue') +
+  ggtitle('Performance Effect on ORE with training and testing') +
+  xlab('Performance') +
+  ylab('ORE')
+
+# Analisis statistik model regresi
+summary(regressor)
 
 #Membuat model polinomial
 ore2$ore.Performance2 = ore2$ore.Performance^2
