@@ -1,0 +1,91 @@
+#Open Data and look for type of data
+library(readxl)
+library(ggplot2)
+ore <- read_excel("01-ORE.xlsx")
+ore2 <- data.frame(ore$ORE, ore$Performance)
+
+#Build Linier Model
+lin_reg = lm(ore.ORE ~ ., data = ore2)
+
+#Visualisasi Regresi Linier
+ggplot() +    
+  geom_point(aes(x = ore2$ore.Performance, 
+                 y = ore2$ore.ORE), 
+             colour = 'red') +    
+  geom_line(aes(x = ore2$ore.Performance, 
+                y = predict(lin_reg, newdata = ore2)), 
+            colour = 'blue') +    
+  ggtitle('Performance Effect on ORE(Linear Regression)') +
+  xlab('Performance') +
+  ylab('ORE')
+
+# Prediksi performance =75% dengan model regresi sederhana
+predict(lin_reg, data.frame(ore.Performance = 75))
+
+#Membuat model polinomial
+ore2$ore.Performance2 = ore2$ore.Performance^2
+ore2$ore.Performance3 = ore2$ore.Performance^3
+ore2$ore.Performance4 = ore2$ore.Performance^4
+poly_reg = lm(ore.ORE ~ ., data = ore2)
+summary(poly_reg)
+
+# Visualisasi hasil regresi polinomial
+# install.packages('ggplot2')
+ggplot() +
+  geom_point(aes(x = ore2$ore.Performance, 
+                 y = ore2$ore.ORE), colour = 'red') +
+  geom_line(aes(x = ore2$ore.Performance, 
+                y = predict(poly_reg, newdata =ore2)), 
+            colour = 'blue') +
+  ggtitle('Performance Effect on ORE (Polynomial Regression)') +
+  xlab('Performance') +
+  ylab('ORE')
+
+# Prediksi Performance = 75% dengan model regresi polinomial
+predict(poly_reg, data.frame(ore.Performance = 75,
+                             ore.Performance2 = 75^2,
+                             ore.Performance3 = 75^3,
+                             ore.Performance4 = 75^4))
+
+# Membuat model SVR
+library(e1071)
+regressor = svm(formula = ore.ORE ~ .,
+                data = ore2,
+                type = 'eps-regression',
+                kernel = 'radial')
+
+# Visualisasi SVR
+library(ggplot2)
+ggplot() +
+  geom_point(aes(x =ore2$ore.Performance, 
+                 y = ore2$ore.ORE),
+             colour = 'red') +
+  geom_line(aes(x =ore2$ore.Performance, 
+                y = predict(regressor, newdata = ore2)),
+            colour = 'blue') +
+  ggtitle('Performance Effect on ORE (SVR Regression') +
+  xlab('Performance') +
+  ylab('ORE')
+
+
+# Membuat model regresi decision tree
+library(rpart)
+DTR = rpart(formula = ore.ORE ~ .,
+                  data = ore2,
+                  control = rpart.control(minsplit = 1))
+
+# Memprediksi hasil model decision tree
+predict(DTR, data.frame(ore.Performance = 75))
+
+# Visualisasi hasil model decision tree
+# install.packages('ggplot2')
+library(ggplot2)
+x_grid = seq(min(dataset$Level), max(dataset$Level), 0.01)
+ggplot() +
+  geom_point(aes(x = dataset$Level, y = dataset$Gaji),
+             colour = 'red') +
+  geom_line(aes(x = x_grid, y = predict(regressor, newdata = data.frame(Level = x_grid))),
+            colour = 'blue') +
+  ggtitle('Sesuai atau Tidak (Decision Tree Regression)') +
+  xlab('Level') +
+  ylab('Gaji')
