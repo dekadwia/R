@@ -139,3 +139,28 @@ ggplot() +
   ggtitle('Performance Effect on ORE (Decision Tree Regression)') +
   xlab('Performance') +
   ylab('ORE')
+  
+  #Random Forest Regression
+
+# Membuat model random forest regression
+library(randomForest)
+set.seed(1234)
+regressor = randomForest(x = ore4$ore.Performance,
+                         y = ore4$ore.ORE,
+                         ntree = 500)
+
+# Memprediksi hasil model regresi random forest
+y_pred = predict(regressor, data.frame(ore4$ore.Performance = 90))
+
+# Visualisasi hasil random forest regression
+# install.packages('ggplot2')
+library(ggplot2)
+x_grid = seq(min(ore4$ore.Performance), max(ore4$ore.Performance), 0.01)
+ggplot() +
+  geom_point(aes(x = ore4$ore.Performance, y = ore4$ore.ORE),
+             colour = 'red') +
+  geom_line(aes(x = x_grid, y = predict(regressor, newdata = data.frame(ore4$ore.Performance = x_grid))),
+            colour = 'blue') +
+  ggtitle('Performance Effect on ORE (Random Forest Regression)') +
+  xlab('Performance') +
+  ylab('ORE')
